@@ -1,9 +1,12 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.clausevault.clausevault.config.NearAiProperties;
+import dev.clausevault.clausevault.model.AuditResult;
+import dev.clausevault.clausevault.model.Risk;
+import dev.clausevault.clausevault.model.StageReceipt;
 import dev.clausevault.clausevault.near.NearAiClient;
 import dev.clausevault.clausevault.near.NearSignatureVerifier;
 import dev.clausevault.clausevault.near.NearVerificationService;

@@ -1,4 +1,4 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.model;
 
 import dev.clausevault.clausevault.near.VerificationResult;
 
@@ -7,5 +7,5 @@ import dev.clausevault.clausevault.near.VerificationResult;
  * {@code verified=false} is data (the UI turns the badge red), not an error.
  */
 public record StageReceipt(String stage, String chatId, String requestHash, String responseHash,
-                           String signatureText, String signingAddress,
+                           String signatureText, String signature, String signingAddress,
                            VerificationResult checks, boolean verified) {}

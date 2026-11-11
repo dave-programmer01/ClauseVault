@@ -1,4 +1,4 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

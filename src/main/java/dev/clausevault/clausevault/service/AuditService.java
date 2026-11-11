@@ -1,5 +1,17 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.service;
 
+import dev.clausevault.clausevault.exception.AuditException;
+import dev.clausevault.clausevault.exception.StageException;
+import dev.clausevault.clausevault.model.AuditResult;
+import dev.clausevault.clausevault.model.AuditRun;
+import dev.clausevault.clausevault.model.Clause;
+import dev.clausevault.clausevault.model.ReviewAction;
+import dev.clausevault.clausevault.model.ReviewRequest;
+import dev.clausevault.clausevault.model.ReviewStatus;
+import dev.clausevault.clausevault.model.Risk;
+import dev.clausevault.clausevault.model.Severity;
+import dev.clausevault.clausevault.model.StageOutput;
+import dev.clausevault.clausevault.model.StageReceipt;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -10,6 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -60,6 +73,57 @@ public class AuditService {
         return Optional.ofNullable(runs.get(id));
     }
 
+    /**
+     * Applies a human review to one risk. Runs inside {@code compute} so concurrent clicks serialize.
+     * Any state may move to any other state. Receipts and raw bytes are untouched: a review never
+     * changes what the model said, it only records what the human decided.
+     */
+    public AuditResult review(String auditId, ReviewRequest req) {
+        validate(req);
+        AuditRun updated = runs.computeIfPresent(auditId, (id, run) -> {
+            List<Risk> risks = new ArrayList<>(run.result().risks());
+            int index = -1;
+            for (int i = 0; i < risks.size(); i++) {
+                if (risks.get(i).id().equals(req.riskId())) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index < 0) {
+                throw new AuditException(HttpStatus.NOT_FOUND, "No risk " + req.riskId() + " in audit " + auditId);
+            }
+            Risk current = risks.get(index);
+            Risk reviewed = switch (req.action()) {
+                case ACCEPT -> current.withStatus(ReviewStatus.ACCEPTED);
+                case DISMISS -> current.withStatus(ReviewStatus.DISMISSED);
+                case EDIT -> current.withEdit(req.severity(), req.explanation());
+            };
+            risks.set(index, reviewed);
+            AuditResult r = run.result();
+            return new AuditRun(new AuditResult(r.id(), r.filename(), r.clauses(), List.copyOf(risks), r.receipts()),
+                run.stages());
+        });
+        if (updated == null) {
+            throw new AuditException(HttpStatus.NOT_FOUND, "No audit with id " + auditId);
+        }
+        log.info("Audit {} risk {} reviewed: {}", auditId, req.riskId(), req.action());
+        return updated.result();
+    }
+
+    private static void validate(ReviewRequest req) {
+        if (req == null || req.riskId() == null || req.riskId().isBlank() || req.action() == null) {
+            throw new AuditException(HttpStatus.BAD_REQUEST, "riskId and action are required");
+        }
+        if (req.action() == ReviewAction.EDIT) {
+            if (req.severity() == null && req.explanation() == null) {
+                throw new AuditException(HttpStatus.BAD_REQUEST, "EDIT needs a severity and/or an explanation");
+            }
+            if (req.explanation() != null && req.explanation().isBlank()) {
+                throw new AuditException(HttpStatus.BAD_REQUEST, "explanation must not be blank");
+            }
+        }
+    }
+
     private record Parsed<T>(StageOutput output, T value) {}
 
     /** Runs a stage and parses its JSON; on a parse failure the stage is retried once, then it throws. */
@@ -70,9 +134,10 @@ public class AuditService {
             try {
                 return new Parsed<>(output, parse.apply(extractJson(output.content())));
             } catch (RuntimeException e) {
-                log.warn("Stage {} attempt {}/{}: unparseable output ({}): {}", stage, attempt, PARSE_ATTEMPTS,
-                    e.getMessage(), abbreviate(output.content()));
-                last = new StageException(stage + ": model did not return the expected JSON", e);
+                // Never log or chain the model output: it contains the contract. Class name and size only.
+                log.warn("Stage {} attempt {}/{}: unparseable output ({}, {} chars)", stage, attempt, PARSE_ATTEMPTS,
+                    e.getClass().getSimpleName(), output.content().length());
+                last = new StageException(stage + ": model did not return the expected JSON");
             }
         }
         throw last;
@@ -99,7 +164,7 @@ public class AuditService {
             String id = n.path("id").asString("").strip();
             String text = n.path("text").asString("");
             if (id.isEmpty() || text.isBlank()) {
-                log.warn("Dropping clause without id or text: {}", abbreviate(n.toString()));
+                log.warn("Dropping clause #{} without id or text", clauses.size() + 1);
                 continue;
             }
             String type = n.path("type").asString("").strip().toUpperCase();
@@ -129,7 +194,8 @@ public class AuditService {
                 normalizeSeverity(n.path("severity").asString("")),
                 n.path("explanation").asString("").strip(),
                 n.path("quote").asString("").strip(),
-                ReviewStatus.PENDING));
+                ReviewStatus.PENDING,
+                false));
         }
         return risks;
     }
@@ -146,9 +212,5 @@ public class AuditService {
             log.warn("Unknown severity '{}', defaulting to MEDIUM", raw);
             return Severity.MEDIUM;
         }
-    }
-
-    private static String abbreviate(String s) {
-        return s.length() <= 300 ? s : s.substring(0, 300) + "...";
     }
 }

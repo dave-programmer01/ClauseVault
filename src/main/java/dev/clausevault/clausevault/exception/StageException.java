@@ -1,4 +1,4 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.exception;
 
 /** A pipeline stage could not complete: NEAR AI unreachable, truncated output, unparseable JSON. Mapped to 502. */
 public class StageException extends RuntimeException {

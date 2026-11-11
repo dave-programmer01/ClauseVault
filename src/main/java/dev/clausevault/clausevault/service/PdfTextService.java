@@ -1,5 +1,6 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.service;
 
+import dev.clausevault.clausevault.exception.AuditException;
 import java.io.IOException;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;

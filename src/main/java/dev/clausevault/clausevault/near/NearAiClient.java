@@ -91,7 +91,9 @@ public class NearAiClient {
         String content = choice.path("message").path("content").asString();
         String finishReason = choice.path("finish_reason").asString("");
         if (id.isEmpty() || content.isEmpty()) {
-            throw new IllegalStateException("Unexpected /chat/completions payload: " + abbreviate(rawResponse));
+            // Never include the body: it carries the contract text. Shape only.
+            throw new IllegalStateException("Unexpected /chat/completions payload (" + rawResponse.length()
+                + " bytes, id=" + (id.isEmpty() ? "missing" : id) + ", content=" + (content.isEmpty() ? "missing" : "present") + ")");
         }
         return new ChatExchange(id, rawRequest, rawResponse, content, finishReason);
     }

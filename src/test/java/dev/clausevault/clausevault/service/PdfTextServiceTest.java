@@ -1,9 +1,10 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import dev.clausevault.clausevault.exception.AuditException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

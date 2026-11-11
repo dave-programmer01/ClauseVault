@@ -1,5 +1,7 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.web;
 
+import dev.clausevault.clausevault.exception.AuditException;
+import dev.clausevault.clausevault.exception.StageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -23,7 +25,8 @@ class AuditExceptionHandler {
 
     @ExceptionHandler(StageException.class)
     ProblemDetail stage(StageException e) {
-        log.error("Pipeline stage failed", e);
+        // Message only (no stack trace): causes could carry gateway bodies.
+        log.error("Pipeline stage failed: {}", e.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, e.getMessage());
     }
 }

@@ -1,7 +1,13 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.web;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import dev.clausevault.clausevault.exception.AuditException;
+import dev.clausevault.clausevault.model.AuditResult;
+import dev.clausevault.clausevault.model.AuditRun;
+import dev.clausevault.clausevault.model.ReviewRequest;
+import dev.clausevault.clausevault.service.AuditService;
+import dev.clausevault.clausevault.service.PdfTextService;
 import java.io.IOException;
 import java.util.Locale;
 import org.springframework.http.HttpStatus;
@@ -9,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +48,12 @@ public class AuditController {
             throw new AuditException(HttpStatus.BAD_REQUEST, "Upload a PDF or a .txt file");
         }
         return auditService.audit(filename, text);
+    }
+
+    /** Human review of one risk. Returns the full updated result so the UI replaces its state from one response. */
+    @PostMapping(path = "/{id}/review", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public AuditResult review(@PathVariable String id, @RequestBody ReviewRequest request) {
+        return auditService.review(id, request);
     }
 
     @GetMapping("/{id}")

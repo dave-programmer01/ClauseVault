@@ -1,4 +1,4 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.service;
 
 import java.util.Set;
 

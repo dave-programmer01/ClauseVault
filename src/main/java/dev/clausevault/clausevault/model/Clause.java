@@ -1,3 +1,3 @@
-package dev.clausevault.clausevault.audit;
+package dev.clausevault.clausevault.model;
 
 public record Clause(String id, String type, String title, String text) {}
