@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HexFormat;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.web3j.crypto.Keys;
@@ -18,8 +19,12 @@ public class NearSignatureVerifier {
 
     private static final String PROVIDER_TEE = "provider_tee";
 
+    /**
+     * @param attestedAddresses lowercased signing addresses of every TEE replica serving the model;
+     *                          the signer must be one of them.
+     */
     public VerificationResult verify(String rawRequest, String rawResponse,
-                                     SignatureResponse sig, String attestedAddress,
+                                     SignatureResponse sig, Set<String> attestedAddresses,
                                      String expectedModel) {
         String text = sig.text();
         if (text == null) {
@@ -43,7 +48,7 @@ public class NearSignatureVerifier {
         boolean responseHashOk = sha256Hex(rawResponse).equalsIgnoreCase(expectedResponseHash);
 
         String recoveredAddress = recoverAddress(text, sig.signature());
-        boolean signerOk = recoveredAddress != null && recoveredAddress.equalsIgnoreCase(attestedAddress);
+        boolean signerOk = recoveredAddress != null && attestedAddresses.contains(recoveredAddress.toLowerCase());
         boolean teeSigned = PROVIDER_TEE.equals(sig.signatureKind());
 
         return new VerificationResult(modelOk, requestHashOk, responseHashOk, signerOk, teeSigned);

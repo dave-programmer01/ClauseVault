@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class NearSignatureVerifierTest {
@@ -27,6 +28,8 @@ class NearSignatureVerifierTest {
 
     private static final String ATTESTED_ADDRESS = "0x2665cce942fa427ef30d87f4b0bff67fb7645462";
 
+    private static final Set<String> ATTESTED = Set.of(ATTESTED_ADDRESS);
+
     private static final SignatureResponse SIG =
         new SignatureResponse(TEXT, SIGNATURE, ATTESTED_ADDRESS, "provider_tee");
 
@@ -34,7 +37,7 @@ class NearSignatureVerifierTest {
 
     @Test
     void validResponse_verifies() throws IOException {
-        VerificationResult result = verifier.verify(REQUEST, loadResponse(), SIG, ATTESTED_ADDRESS, MODEL);
+        VerificationResult result = verifier.verify(REQUEST, loadResponse(), SIG, ATTESTED, MODEL);
 
         assertTrue(result.modelOk(), "model");
         assertTrue(result.requestHashOk(), "request hash");
@@ -48,7 +51,7 @@ class NearSignatureVerifierTest {
     void tamperedResponse_fails() throws IOException {
         String tampered = loadResponse().replaceFirst("unlimited liability", "unlimitedXliability");
 
-        VerificationResult result = verifier.verify(REQUEST, tampered, SIG, ATTESTED_ADDRESS, MODEL);
+        VerificationResult result = verifier.verify(REQUEST, tampered, SIG, ATTESTED, MODEL);
 
         assertFalse(result.responseHashOk());
         assertFalse(result.verified());
@@ -56,7 +59,7 @@ class NearSignatureVerifierTest {
 
     @Test
     void wrongModel_fails() throws IOException {
-        VerificationResult result = verifier.verify(REQUEST, loadResponse(), SIG, ATTESTED_ADDRESS, "other/model");
+        VerificationResult result = verifier.verify(REQUEST, loadResponse(), SIG, ATTESTED, "other/model");
 
         assertFalse(result.modelOk());
         assertTrue(result.signerOk(), "signature itself is still valid");
@@ -69,10 +72,29 @@ class NearSignatureVerifierTest {
         String sigWithRawV = SIGNATURE.substring(0, SIGNATURE.length() - 2) + "01";
         SignatureResponse sig = new SignatureResponse(TEXT, sigWithRawV, ATTESTED_ADDRESS, "provider_tee");
 
-        VerificationResult result = verifier.verify(REQUEST, loadResponse(), sig, ATTESTED_ADDRESS, MODEL);
+        VerificationResult result = verifier.verify(REQUEST, loadResponse(), sig, ATTESTED, MODEL);
 
         assertTrue(result.signerOk());
         assertTrue(result.verified());
+    }
+
+    @Test
+    void signerAmongSeveralReplicas_ok() throws IOException {
+        Set<String> replicas = Set.of("0x1111111111111111111111111111111111111111", ATTESTED_ADDRESS);
+
+        VerificationResult result = verifier.verify(REQUEST, loadResponse(), SIG, replicas, MODEL);
+
+        assertTrue(result.signerOk());
+    }
+
+    @Test
+    void signerNotAttested_fails() throws IOException {
+        Set<String> others = Set.of("0x1111111111111111111111111111111111111111");
+
+        VerificationResult result = verifier.verify(REQUEST, loadResponse(), SIG, others, MODEL);
+
+        assertFalse(result.signerOk());
+        assertFalse(result.verified());
     }
 
     @Test
@@ -80,7 +102,7 @@ class NearSignatureVerifierTest {
         for (String bad : new String[] {"", "no-colons", "one:colon", ":"}) {
             SignatureResponse sig = new SignatureResponse(bad, SIGNATURE, ATTESTED_ADDRESS, "provider_tee");
 
-            VerificationResult result = verifier.verify(REQUEST, loadResponse(), sig, ATTESTED_ADDRESS, MODEL);
+            VerificationResult result = verifier.verify(REQUEST, loadResponse(), sig, ATTESTED, MODEL);
 
             assertFalse(result.verified(), "text=" + bad);
         }
