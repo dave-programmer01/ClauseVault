@@ -29,6 +29,12 @@ GLM 5.3 Flash was tested and rejected (ignores the thinking flag, times out).
 - Badge wording (decided): badge says "Verified in TEE"; proof panel says "Signed by an attested TEE key" with copy
   buttons for signer, signed text, signature + the verify link. Our 5 checks prove the signer is in NEAR's attestation
   report; hardware quote verification is delegated to NEAR's verifier (say so in README).
+  The #receipt format is undocumented and can change: keep the copy buttons as the fallback, and re-open a fresh
+  verifyUrl in a browser on Sat Nov 14 before submitting (confirm signer, TDX and GPU go green).
+- Verify link UI rules (ticket 3/4): open with target="_blank" rel="noopener noreferrer" (otherwise the audit URL with
+  the id leaks to NEAR in the Referer). Permanent caption under the link: "Checks the signature and hardware. Content
+  hashes are checked by ClauseVault." After the tamper button, NEAR's page stays green (signature + signed text are
+  still valid) while our badge goes red, so on a failed receipt list which of the five checks failed next to it.
 - Privacy: no contract text, prompt or response body in logs or exception messages (hashes, chat ids, sizes only).
   GET /api/audit/{id} returns hashes + signature + signer, never raw bytes (those stay in AuditRun for the tamper button).
 
