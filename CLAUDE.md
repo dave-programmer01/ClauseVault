@@ -45,7 +45,11 @@ GLM 5.3 Flash was tested and rejected (ignores the thinking flag, times out).
 ## Todo (in order)
 1. DONE (see above).
 2. DONE (see above).
-3. React UI: upload, risk cards (severity colors) with Accept/Dismiss, per-stage "Verified in TEE" badge + proof panel + cloud.near.ai/verify link.
+3. IN PROGRESS. frontend/ = Vite + React 19 + TS (npm run dev on :5173, proxies /api to :8080; npm run build type-checks,
+   tsconfig has erasableSyntaxOnly so no TS parameter properties). src/types.ts mirrors model records, src/api.ts
+   wraps audit/getAudit/review with ProblemDetail errors. Checkpoint done: upload form renders raw JSON.
+   Remaining: risk cards, accept/dismiss/edit, badges + proof panel, then serve the build from Spring (one-command run).
+   React UI: upload, risk cards (severity colors) with Accept/Dismiss, per-stage "Verified in TEE" badge + proof panel + cloud.near.ai/verify link.
    Show edited=true risks as "human-edited" (badge must not vouch for edited text); hide clause type OTHER.
 4. Tamper button (flip 1 byte -> badge red); accuracy vs samples/eval.json (labels are uppercase, match Risk.category).
    README: call it "3 hand-written contracts with planted risks" (stage 2 prompt was tuned on them), not general accuracy;
