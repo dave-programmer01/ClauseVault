@@ -28,13 +28,15 @@ public class NearAiClient {
     private static final String SIGNING_ALGO = "ecdsa";
     private static final int SIGNATURE_ATTEMPTS = 3;
     private static final long SIGNATURE_RETRY_DELAY_MS = 1_000;
-    private static final Duration READ_TIMEOUT = Duration.ofSeconds(90);
+    private static final Duration READ_TIMEOUT = Duration.ofSeconds(120);
 
     private final RestClient restClient;
     private final ObjectMapper mapper;
     private final String model;
     private final SecureRandom random = new SecureRandom();
     private final AtomicReference<Set<String>> cachedAttestedAddresses = new AtomicReference<>();
+    /** Ask for {"type":"json_object"}; cleared on the first 400 so a gateway that rejects it costs one retry. */
+    private volatile boolean jsonResponseFormat = true;
 
     public NearAiClient(RestClient.Builder builder, NearAiProperties props, ObjectMapper mapper) {
         JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory();
@@ -51,15 +53,70 @@ public class NearAiClient {
         this.model = props.model();
     }
 
-    /** Sends one user prompt to /chat/completions and returns the exact request and response bytes. */
+    /** Sends one user prompt (no system prompt, default sampling) and returns the exact bytes. */
     public ChatExchange chat(String prompt) {
-        // Serialize exactly once; this string is both what we send and what we hash.
+        return chat(null, prompt, false);
+    }
+
+    /**
+     * Sends a system + user message pair deterministically (temperature 0, max_tokens 6000, no streaming,
+     * JSON response format while the gateway accepts it) and returns the exact request and response bytes.
+     */
+    public ChatExchange chat(String systemPrompt, String userContent) {
+        return chat(systemPrompt, userContent, true);
+    }
+
+    private ChatExchange chat(String systemPrompt, String userContent, boolean structured) {
+        boolean jsonMode = structured && jsonResponseFormat;
+        String rawRequest = buildRequest(systemPrompt, userContent, structured, jsonMode);
+        byte[] responseBytes;
+        try {
+            responseBytes = post(rawRequest);
+        } catch (HttpClientErrorException.BadRequest e) {
+            if (!jsonMode) {
+                throw e;
+            }
+            log.warn("Gateway rejected response_format=json_object ({}); retrying without it",
+                abbreviate(e.getResponseBodyAsString()));
+            jsonResponseFormat = false;
+            rawRequest = buildRequest(systemPrompt, userContent, structured, false);
+            responseBytes = post(rawRequest);
+        }
+        String rawResponse = new String(responseBytes, UTF_8);
+
+        // Reading the tree is fine; the raw bytes above are what gets hashed, never a re-serialization.
+        JsonNode root = mapper.readTree(rawResponse);
+        String id = root.path("id").asString();
+        JsonNode choice = root.path("choices").path(0);
+        String content = choice.path("message").path("content").asString();
+        String finishReason = choice.path("finish_reason").asString("");
+        if (id.isEmpty() || content.isEmpty()) {
+            throw new IllegalStateException("Unexpected /chat/completions payload: " + abbreviate(rawResponse));
+        }
+        return new ChatExchange(id, rawRequest, rawResponse, content, finishReason);
+    }
+
+    /** Serializes the body exactly once; the returned string is both what we send and what we hash. */
+    private String buildRequest(String systemPrompt, String userContent, boolean structured, boolean jsonMode) {
         ObjectNode body = mapper.createObjectNode();
         body.put("model", model);
         ArrayNode messages = body.putArray("messages");
-        messages.addObject().put("role", "user").put("content", prompt);
-        String rawRequest = mapper.writeValueAsString(body);
+        if (systemPrompt != null) {
+            messages.addObject().put("role", "system").put("content", systemPrompt);
+        }
+        messages.addObject().put("role", "user").put("content", userContent);
+        if (structured) {
+            body.put("temperature", 0);
+            body.put("max_tokens", 6000);
+            body.put("stream", false);
+        }
+        if (jsonMode) {
+            body.putObject("response_format").put("type", "json_object");
+        }
+        return mapper.writeValueAsString(body);
+    }
 
+    private byte[] post(String rawRequest) {
         byte[] responseBytes = restClient.post()
             .uri("/chat/completions")
             .contentType(MediaType.APPLICATION_JSON)
@@ -69,15 +126,7 @@ public class NearAiClient {
         if (responseBytes == null) {
             throw new IllegalStateException("Empty response from /chat/completions");
         }
-        String rawResponse = new String(responseBytes, UTF_8);
-
-        JsonNode root = mapper.readTree(rawResponse);
-        String id = root.path("id").asString();
-        String content = root.path("choices").path(0).path("message").path("content").asString();
-        if (id.isEmpty() || content.isEmpty()) {
-            throw new IllegalStateException("Unexpected /chat/completions payload: " + abbreviate(rawResponse));
-        }
-        return new ChatExchange(id, rawRequest, rawResponse, content);
+        return responseBytes;
     }
 
     /**

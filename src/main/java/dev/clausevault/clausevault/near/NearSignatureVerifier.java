@@ -3,8 +3,6 @@ package dev.clausevault.clausevault.near;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.Set;
@@ -55,12 +53,7 @@ public class NearSignatureVerifier {
     }
 
     private static String sha256Hex(String input) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(input.getBytes(UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 not available", e);
-        }
+        return Sha256.hex(input.getBytes(UTF_8));
     }
 
     private static String recoverAddress(String text, String signatureHex) {

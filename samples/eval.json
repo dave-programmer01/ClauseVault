@@ -1,10 +1,10 @@
 {
   "description": "Expected risk flags for the sample contracts. Each expected flag names the section where the risk is planted and a short phrase that appears verbatim in that section, so an eval can check both that the flag was raised and that the right clause was cited. 'forbidden_flags' are risks that are NOT present; raising them counts as a false positive.",
   "flag_taxonomy": {
-    "unlimited_liability": "Uncapped or grossly asymmetric liability or indemnity exposure for one party.",
-    "auto_renewal": "Term renews automatically unless notice is given, especially with long renewal periods, narrow notice windows, or built-in increases.",
-    "one_sided_termination": "One party may terminate freely while the other cannot, or can only under onerous conditions.",
-    "ip_assignment": "Broad assignment of intellectual property or work product to the counterparty, including pre-existing or independently created material."
+    "UNLIMITED_LIABILITY": "Uncapped or grossly asymmetric liability or indemnity exposure for one party.",
+    "AUTO_RENEWAL": "Term renews automatically unless notice is given, especially with long renewal periods, narrow notice windows, or built-in increases.",
+    "ONE_SIDED_TERMINATION": "One party may terminate freely while the other cannot, or can only under onerous conditions.",
+    "IP_ASSIGNMENT": "Broad assignment of intellectual property or work product to the counterparty, including pre-existing or independently created material."
   },
   "samples": [
     {
@@ -12,56 +12,56 @@
       "type": "nda",
       "expected_flags": [
         {
-          "flag": "ip_assignment",
+          "flag": "IP_ASSIGNMENT",
           "section": "5",
           "evidence": "whether or not derived from Confidential Information",
           "notes": "Assigns everything Recipient creates during the Purpose, including improvements to Recipient's own pre-existing tools, and waives moral rights."
         },
         {
-          "flag": "one_sided_termination",
+          "flag": "ONE_SIDED_TERMINATION",
           "section": "6",
           "evidence": "Discloser may terminate this Agreement at any time, for any reason or no reason",
           "notes": "Recipient can only terminate for uncured material breach after 90 days and then only with Discloser's consent."
         },
         {
-          "flag": "unlimited_liability",
+          "flag": "UNLIMITED_LIABILITY",
           "section": "7",
           "evidence": "without limit as to amount",
           "notes": "Recipient indemnifies for all loss including consequential and punitive damages with no cap; Discloser's own liability is capped at GBP 100."
         }
       ],
-      "forbidden_flags": ["auto_renewal"]
+      "forbidden_flags": ["AUTO_RENEWAL"]
     },
     {
       "file": "lease-office.txt",
       "type": "lease",
       "expected_flags": [
         {
-          "flag": "auto_renewal",
+          "flag": "AUTO_RENEWAL",
           "section": "2",
           "evidence": "automatically renew for a further term of twenty-four (24) months",
           "notes": "12-month initial term rolls into 24-month renewals, notice must land exactly 180 days before expiry or is void, and rent rises 8% each renewal."
         },
         {
-          "flag": "unlimited_liability",
+          "flag": "UNLIMITED_LIABILITY",
           "section": "7",
           "evidence": "There is no cap on Tenant's liability under this Lease",
           "notes": "Tenant indemnifies for all loss including other tenants' lost rent and consequential loss, even where caused by Landlord's own negligence."
         },
         {
-          "flag": "one_sided_termination",
+          "flag": "ONE_SIDED_TERMINATION",
           "section": "9",
           "evidence": "Landlord may terminate this Lease at any time on thirty (30) days' written notice, with or without cause",
           "notes": "Tenant has no early termination right at all and receives no compensation if Landlord terminates."
         }
       ],
-      "forbidden_flags": ["ip_assignment"]
+      "forbidden_flags": ["IP_ASSIGNMENT"]
     },
     {
       "file": "nda-mutual-clean.txt",
       "type": "nda",
       "expected_flags": [],
-      "forbidden_flags": ["unlimited_liability", "auto_renewal", "one_sided_termination", "ip_assignment"],
+      "forbidden_flags": ["UNLIMITED_LIABILITY", "AUTO_RENEWAL", "ONE_SIDED_TERMINATION", "IP_ASSIGNMENT"],
       "notes": "Control sample. Balanced mutual NDA: no assignment, mutual 30-day termination, fixed term with no auto-renewal, liability capped at EUR 250,000 with only the legally required carve-outs. Any of the four flags here is a false positive."
     }
   ]
