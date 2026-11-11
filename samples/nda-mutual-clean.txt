@@ -1,0 +1,26 @@
+MUTUAL NON-DISCLOSURE AGREEMENT
+
+This Agreement is made on 14 April 2026 between Orwen Robotics GmbH and Tallis Logistics AS (each a "Party").
+
+1. Purpose. The Parties wish to evaluate a possible warehouse automation partnership (the "Purpose") and may exchange Confidential Information for that reason.
+
+2. Confidential Information. Non-public technical, commercial or financial information disclosed by one Party to the other that is marked confidential or would reasonably be understood to be confidential. The exclusions in Section 4 apply.
+
+3. Obligations. Each receiving Party shall use the other's Confidential Information only for the Purpose, disclose it only to personnel and professional advisers who need to know and are bound by confidentiality, and protect it with reasonable care.
+
+4. Exclusions. Information that is public through no breach, already lawfully known, independently developed, or lawfully obtained from a third party is not Confidential Information. Disclosure compelled by law is permitted with prompt notice where lawful.
+
+5. Intellectual Property. Each Party retains all rights in its own Confidential Information and pre-existing materials. No licence or assignment is granted under this Agreement except the limited right to use Confidential Information for the Purpose. Any jointly developed materials will be addressed in a separate written agreement.
+
+6. Term. This Agreement lasts for two (2) years from the date above. Either Party may terminate it earlier on thirty (30) days' written notice. Confidentiality obligations survive for three (3) years after disclosure of the relevant information.
+
+7. Liability. Neither Party is liable for indirect or consequential loss. Each Party's aggregate liability under this Agreement is limited to EUR 250,000, except for liability arising from wilful misconduct or fraud, which may not be limited by law. Each Party acknowledges that injunctive relief may be an appropriate remedy for breach.
+
+8. Return. On termination or request, each Party shall return or destroy the other's Confidential Information, subject to routine backup retention and legal hold requirements.
+
+9. Governing Law. German law applies. The courts of Munich have exclusive jurisdiction.
+
+10. Entire Agreement. This Agreement is the whole agreement on its subject and may be amended only in writing signed by both Parties.
+
+Signed for Orwen Robotics GmbH: ______________________
+Signed for Tallis Logistics AS: ______________________

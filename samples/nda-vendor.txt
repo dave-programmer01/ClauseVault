@@ -1,0 +1,26 @@
+MUTUAL NON-DISCLOSURE AGREEMENT
+
+This Non-Disclosure Agreement ("Agreement") is entered into on 3 March 2026 between Halden Analytics Ltd ("Discloser") and Brightmoor Consulting LLP ("Recipient").
+
+1. Purpose. The parties wish to explore a potential engagement under which Recipient would review Discloser's pricing models (the "Purpose"). Each party may disclose Confidential Information to the other in connection with the Purpose.
+
+2. Confidential Information. "Confidential Information" means any non-public information disclosed by either party, whether oral, written or electronic, that is marked confidential or would reasonably be understood to be confidential.
+
+3. Obligations. Recipient shall (a) use Confidential Information solely for the Purpose, (b) not disclose it to any third party except to employees with a need to know who are bound by written obligations no less protective than this Agreement, and (c) protect it with at least the same degree of care it uses for its own confidential information, and no less than reasonable care.
+
+4. Exclusions. The obligations in Section 3 do not apply to information that (a) is or becomes public through no fault of Recipient, (b) was lawfully known to Recipient before disclosure, (c) is independently developed without reference to Confidential Information, or (d) is required to be disclosed by law, provided Recipient gives Discloser prompt notice.
+
+5. Work Product and Intellectual Property. All notes, analyses, models, software, inventions and other materials created by Recipient in the course of the Purpose, whether or not derived from Confidential Information and whether created alone or jointly, shall be the sole and exclusive property of Discloser. Recipient hereby irrevocably assigns to Discloser all right, title and interest, including all intellectual property rights, in such materials, and waives any moral rights therein. This assignment extends to improvements Recipient makes to its own pre-existing tools while performing the Purpose.
+
+6. Term and Termination. This Agreement commences on the date above and continues for two (2) years. Discloser may terminate this Agreement at any time, for any reason or no reason, on written notice. Recipient may terminate only upon a material breach by Discloser that remains uncured ninety (90) days after written notice, and only with Discloser's written consent to the termination.
+
+7. Liability. Recipient acknowledges that unauthorised disclosure would cause irreparable harm. Recipient shall indemnify and hold harmless Discloser against all losses, damages, costs and expenses of any kind, including indirect, consequential and punitive damages and lost profits, arising from any breach of this Agreement, without limit as to amount. Discloser's aggregate liability under this Agreement shall not exceed one hundred pounds (GBP 100).
+
+8. Return of Materials. On termination or on request, Recipient shall return or destroy all Confidential Information and certify in writing that it has done so.
+
+9. Governing Law. This Agreement is governed by the laws of England and Wales. The courts of England have exclusive jurisdiction.
+
+10. Entire Agreement. This Agreement is the entire agreement between the parties on its subject matter and may be amended only in writing signed by both parties.
+
+Signed for Halden Analytics Ltd: ______________________
+Signed for Brightmoor Consulting LLP: ______________________
