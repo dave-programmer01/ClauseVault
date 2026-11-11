@@ -21,6 +21,14 @@ GLM 5.3 Flash was tested and rejected (ignores the thinking flag, times out).
 - Ticket 2: POST /api/audit/{id}/review {riskId, action ACCEPT|DISMISS|EDIT, severity?, explanation?} -> full AuditResult.
   Risk has edited flag; EDIT touches only severity/explanation, sets ACCEPTED + edited=true. Receipts/raw bytes never change.
   Any state -> any state. Update runs inside ConcurrentHashMap.computeIfPresent.
+- Verify link: StageReceipt.verifyUrl = https://cloud.near.ai/verify?model=<id>#receipt=<base64url JSON>
+  (fields completionId, model, signingAlgo=ecdsa, signingAddress, signedText, signature, signatureKind). Confirmed by
+  reading the page's JS: standalone mode reads ?model and #receipt, verifies the signature in the browser, fragment
+  never reaches NEAR's server, then verifies the TDX quote + GPU evidence for the signing key via its own proxy.
+  Embedded mode (iframe + postMessage) also exists; not used.
+- Badge wording (decided): badge says "Verified in TEE"; proof panel says "Signed by an attested TEE key" with copy
+  buttons for signer, signed text, signature + the verify link. Our 5 checks prove the signer is in NEAR's attestation
+  report; hardware quote verification is delegated to NEAR's verifier (say so in README).
 - Privacy: no contract text, prompt or response body in logs or exception messages (hashes, chat ids, sizes only).
   GET /api/audit/{id} returns hashes + signature + signer, never raw bytes (those stay in AuditRun for the tamper button).
 

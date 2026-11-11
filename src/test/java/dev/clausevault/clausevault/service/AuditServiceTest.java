@@ -49,7 +49,7 @@ class AuditServiceTest {
 
     private static StageOutput output(String stage, String content, boolean verified) {
         VerificationResult checks = new VerificationResult(verified, verified, verified, verified, verified);
-        StageReceipt receipt = new StageReceipt(stage, "chat-" + stage, "req", "resp", "text", "0xsig", "0xabc", checks, verified);
+        StageReceipt receipt = new StageReceipt(stage, "chat-" + stage, "req", "resp", "text", "0xsig", "0xabc", checks, verified, "https://cloud.near.ai/verify?model=m#receipt=x");
         return new StageOutput(content, receipt, "{}".getBytes(StandardCharsets.UTF_8),
             content.getBytes(StandardCharsets.UTF_8));
     }

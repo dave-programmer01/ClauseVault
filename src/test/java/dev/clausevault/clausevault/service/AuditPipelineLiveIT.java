@@ -10,6 +10,7 @@ import dev.clausevault.clausevault.model.StageReceipt;
 import dev.clausevault.clausevault.near.NearAiClient;
 import dev.clausevault.clausevault.near.NearSignatureVerifier;
 import dev.clausevault.clausevault.near.NearVerificationService;
+import dev.clausevault.clausevault.near.NearVerifyLink;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +35,8 @@ class AuditPipelineLiveIT {
         JsonMapper mapper = JsonMapper.builder().build();
         NearAiClient client = new NearAiClient(RestClient.builder(), props, mapper);
         NearVerificationService verification = new NearVerificationService(client, new NearSignatureVerifier(), props);
-        AuditService service = new AuditService(new StageRunner(client, verification), mapper);
+        AuditService service = new AuditService(
+            new StageRunner(client, verification, new NearVerifyLink(mapper), props), mapper);
 
         String text = Files.readString(Path.of("samples/nda-vendor.txt"));
         long started = System.currentTimeMillis();
@@ -45,6 +47,7 @@ class AuditPipelineLiveIT {
             + " " + r.severity() + " | " + r.quote()));
         result.receipts().forEach(r -> System.out.println("receipt " + r.stage() + " chat=" + r.chatId()
             + " verified=" + r.verified() + " checks=" + r.checks()));
+        System.out.println("verify link (stage 2) = " + result.receipts().get(1).verifyUrl());
 
         assertFalse(result.clauses().isEmpty());
         List<String> categories = result.risks().stream().map(Risk::category).toList();

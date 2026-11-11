@@ -2,12 +2,14 @@ package dev.clausevault.clausevault.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import dev.clausevault.clausevault.config.NearAiProperties;
 import dev.clausevault.clausevault.exception.StageException;
 import dev.clausevault.clausevault.model.StageOutput;
 import dev.clausevault.clausevault.model.StageReceipt;
 import dev.clausevault.clausevault.near.ChatExchange;
 import dev.clausevault.clausevault.near.NearAiClient;
 import dev.clausevault.clausevault.near.NearVerificationService;
+import dev.clausevault.clausevault.near.NearVerifyLink;
 import dev.clausevault.clausevault.near.Sha256;
 import dev.clausevault.clausevault.near.SignatureResponse;
 import dev.clausevault.clausevault.near.VerificationResult;
@@ -22,10 +24,15 @@ public class StageRunner {
 
     private final NearAiClient client;
     private final NearVerificationService verification;
+    private final NearVerifyLink verifyLink;
+    private final String model;
 
-    public StageRunner(NearAiClient client, NearVerificationService verification) {
+    public StageRunner(NearAiClient client, NearVerificationService verification, NearVerifyLink verifyLink,
+                       NearAiProperties props) {
         this.client = client;
         this.verification = verification;
+        this.verifyLink = verifyLink;
+        this.model = props.model();
     }
 
     public StageOutput run(String stage, String systemPrompt, String userContent) {
@@ -52,7 +59,8 @@ public class StageRunner {
         byte[] rawResponse = exchange.rawResponse().getBytes(UTF_8);
         StageReceipt receipt = new StageReceipt(
             stage, exchange.id(), Sha256.hex(rawRequest), Sha256.hex(rawResponse),
-            sig.text(), sig.signature(), sig.signingAddress(), checks, checks.verified());
+            sig.text(), sig.signature(), sig.signingAddress(), checks, checks.verified(),
+            verifyLink.build(model, exchange.id(), sig));
         log.info("Stage {} chat {} verified={} ({} chars)", stage, exchange.id(), checks.verified(),
             exchange.content().length());
         return new StageOutput(exchange.content(), receipt, rawRequest, rawResponse);
