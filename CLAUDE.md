@@ -45,10 +45,11 @@ GLM 5.3 Flash was tested and rejected (ignores the thinking flag, times out).
 ## Todo (in order)
 1. DONE (see above).
 2. DONE (see above).
-3. IN PROGRESS. frontend/ = Vite + React 19 + TS (npm run dev on :5173, proxies /api to :8080; npm run build type-checks,
-   tsconfig has erasableSyntaxOnly so no TS parameter properties). src/types.ts mirrors model records, src/api.ts
-   wraps audit/getAudit/review with ProblemDetail errors. Checkpoint done: upload form renders raw JSON.
-   Remaining: risk cards, accept/dismiss/edit, badges + proof panel, then serve the build from Spring (one-command run).
+3. IN PROGRESS. Frontend is a SEPARATE Next.js project (user's own repo), calling this API directly from :3000.
+   CorsConfig allows /api/** from clausevault.cors.allowed-origins (default http://localhost:3000, comma-separated;
+   GET/POST/OPTIONS, Content-Type header). frontend/ (Vite scaffold) is superseded; its src/types.ts and src/api.ts
+   are a paste-ready starting point for the Next.js app (types mirror the model records, api.ts wraps
+   audit/getAudit/review with ProblemDetail errors).
    React UI: upload, risk cards (severity colors) with Accept/Dismiss, per-stage "Verified in TEE" badge + proof panel + cloud.near.ai/verify link.
    Show edited=true risks as "human-edited" (badge must not vouch for edited text); hide clause type OTHER.
 4. Tamper button (flip 1 byte -> badge red); accuracy vs samples/eval.json (labels are uppercase, match Risk.category).

@@ -4,10 +4,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import dev.clausevault.clausevault.config.CorsConfig;
 import dev.clausevault.clausevault.exception.AuditException;
 import dev.clausevault.clausevault.exception.StageException;
 import dev.clausevault.clausevault.model.AuditResult;
@@ -22,13 +25,15 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(AuditController.class)
+@WebMvcTest(controllers = AuditController.class)
+@Import(CorsConfig.class)
 class AuditControllerTest {
 
     @Autowired
@@ -123,6 +128,24 @@ class AuditControllerTest {
         mvc.perform(post("/api/audit/id1/review").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"riskId\":\"r1\",\"action\":\"MAYBE\"}"))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void corsPreflight_allowsNextDevServer() throws Exception {
+        mvc.perform(options("/api/audit/id1/review")
+                .header("Origin", "http://localhost:3000")
+                .header("Access-Control-Request-Method", "POST")
+                .header("Access-Control-Request-Headers", "Content-Type"))
+            .andExpect(status().isOk())
+            .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:3000"));
+    }
+
+    @Test
+    void corsPreflight_rejectsUnknownOrigin() throws Exception {
+        mvc.perform(options("/api/audit")
+                .header("Origin", "https://evil.example")
+                .header("Access-Control-Request-Method", "POST"))
+            .andExpect(status().isForbidden());
     }
 
     @Test
